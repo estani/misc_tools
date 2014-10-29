@@ -6,9 +6,8 @@ import re
 #for cleaning the statements
 CLEAN=re.compile('^[^:]*: *')
 
-
 def extract_sql(args):
-    if args[7] in ['SELECT']:
+    if args[7] in ['SELECT'] or (args[13].startswith('statement:') and 'DEALLOCATE' not in args[13]):
         return '/* #%s */ %s' % (args[0],CLEAN.sub('', args[13]))
 
 def filter_users(users, args):
@@ -23,7 +22,6 @@ def main():
     parser.add_argument('--sql_only', action='store_true', help='Output SQL only.')
     parser.add_argument('log', help='The pg csv log file')
     args = parser.parse_args()
-    print args
     
     with open(args.log, 'rb') as fh:
         for entry in csv.reader(fh, 'excel'):
